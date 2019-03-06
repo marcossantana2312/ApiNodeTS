@@ -14,7 +14,7 @@ class Routes{
         app.get('/api/users/:id', this.userRouter.findOne);
         app.post('/api/users/new', this.userRouter.create);
         app.put('/api/users/:id/update', this.userRouter.update);
-        app.delete('api/user/:id/delete', this.userRouter.delete);
+        app.delete('/api/users/:id/delete', this.userRouter.delete);
     }
 }
 

@@ -1,48 +1,66 @@
 import{ app, request, expect } from './config/helpers';
+import * as HTTPStatus from 'http-status'
+import * as model from '../../server/models/userModel'
+import { log } from 'util';
 
 describe('Testes de Integração', ()=>{
+    'use strict'
+    const config = require('../../server/config/env/config')();
+    const models = require('../../server/models');
+    let id;
 
-    describe('GET /', ()=>{
-        it('Deve retornar a mensagem Hello World', done =>{
-            request(app)
-            .get('/')
-            .end((error, res: Response)=>{
-                expect(res.status).to.equal(200);
-                expect(res.text).to.be.eql('Hello World');
-                done(error);
-            });
-        });
-    });
-
-    describe('GET /ola/:nome', ()=>{
-        const nome = 'Marquito passado';
-        it(`Deve retornar a mensagem Hello, ${nome}`, done =>{
-            request(app)
-                .get(`/ola/${nome}`)
-                .end((error, res: Response)=>{
-                    expect(res.status).to.equal(200);
-                    expect(res.text).to.be.equal(`Hello, ${nome}`);
-                    done(error);
+    const userTest = {
+        id:100,
+        name: 'Usuario teste',
+        email: 'test@test.com',
+        password: 'teste'
+    }
+    const userDefault = {
+        id:1,
+        name: 'Usuario default',
+        email: 'default@default.com',
+        password: 'default'
+    }
+    
+    beforeEach((done)=>{
+        models.User.destroy({
+            where: {}
+        }).then(()=>{
+            return models.User.create(userDefault);
+        }).then(()=>{
+            models.User.create(userTest)
+                .then(()=>{
+                    done();
                 })
         })
-    })
+    });
 
     describe('GET api/users/all', ()=>{
         it('Deve retornar um Json com todos os usuários', done=> {
             request(app)
                 .get('/api/users/all')
-                .end((error: Error, res: Response) =>{
-                    expect(res.status).to.equal(200);
+                .end((error: Error, res) =>{
+                    expect(res.status).to.equal(HTTPStatus.OK);
+                    expect(res.body.payload).to.be.an('array');
+                    expect(res.body.payload[0].name).to.be.equal(userDefault.name);
+                    expect(res.body.payload[0].email).to.be.equal(userDefault.email);
+                    done(error);
                 })
         });
     });
-
     describe('GET api/users/:id', ()=>{
         it('Deve retornar um Json com apenas um usuário', done=> {
+
             request(app)
-                .get(`/api/users/${1}`)
-                .end((error: Error, res: Response) =>{
-                    expect(res.status).to.equal(200);
+                .get(`/api/users/${userDefault.id}`)
+                .end((error: Error, res) =>{
+                    expect(res.status).to.equal(HTTPStatus.OK);
+                    expect(res.body.payload.id).to.be.equal(userDefault.id);
+                    expect(res.body.payload).to.have.all.keys([
+                        'id', 'name', 'email', 'password'
+                    ]);
+                    id = res.body.payload.id;
+                    done(error);
                 })
         });
     });
@@ -51,14 +69,21 @@ describe('Testes de Integração', ()=>{
         it('Deve criar um novo usuário', done=> {
             
             const user = {
-                nome: 'Teste'
+                id: 2,
+                name: 'Usuário teste post',
+                email: 'usuario@teste.com',
+                password: 'novousuario'
             }
 
             request(app)
               .post('/api/users/new')
               .send(user)
-              .end((error: Error, res: Response) =>{
-                expect(res.status).to.equal(200);
+              .end((error: Error, res) =>{
+                expect(res.status).to.equal(HTTPStatus.OK);
+                expect(res.body.payload.id).to.be.equal(user.id);
+                expect(res.body.payload.name).to.be.equal(user.name);
+                expect(res.body.payload.email).to.be.equal(user.email);
+                done(error);
               })
         });
     });
@@ -66,13 +91,18 @@ describe('Testes de Integração', ()=>{
     describe('PUT api/users/:id/update', ()=>{
         it('Deve atualizar um usuário', done=> {
             const user = {
-                nome : 'TesteUpdate'
+                id: id,
+                name : 'TesteUpdate',
+                email: 'test@email.com',
+                password: 'teste'
             }
             request(app)
-            .put(`/api/users/${1}/edit`)
+            .put(`/api/users/${id}/update`)
             .send(user)
-            .end((error: Error, res: Response) =>{
-                expect(res.status).to.equal(200);
+            .end((error: Error, res) =>{     
+                expect(res.status).to.equal(HTTPStatus.OK);
+                expect(res.body.payload[0]).to.be.equal(1);
+                done(error);
             })
         });
     });
@@ -80,9 +110,11 @@ describe('Testes de Integração', ()=>{
     describe('DELETE api/users/:id/delete', ()=>{
         it('Deve deletar um usuário', done=> {
             request(app)
-            .DELETE(`/api/users/delete/${1}`)
-            .end((error: Error, res: Response) =>{
-                expect(res.status).to.equal(200);
+            .delete(`/api/users/${userDefault.id}/delete`)
+            .end((error: Error, res) =>{
+                expect(res.status).to.equal(HTTPStatus.OK);
+                expect(res.body.payload).to.be.equal(1);
+                done(error);
             })
         });
     });
