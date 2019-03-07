@@ -40,6 +40,7 @@ describe('Testes de Integração', ()=>{
             request(app)
                 .get('/api/users/all')
                 .end((error: Error, res) =>{
+
                     expect(res.status).to.equal(HTTPStatus.OK);
                     expect(res.body.payload).to.be.an('array');
                     expect(res.body.payload[0].name).to.be.equal(userDefault.name);

@@ -16,6 +16,12 @@ class UserController{
 
     getAll(req: Request, res: Response){
         this.userService.getAll()
+            // .then(data => {
+            //     res.sendStatus(200).json({payload: data})
+            // })
+            // .catch(err => {
+            //     res.send(HTTPStatus.INTERNAL_SERVER_ERROR).json({payload: 'Erro'})
+            // })
             .then(_.partial(onSuccess, res))
             .catch(_.partial(onError, res, 'Erro ao buscar todos os usuários'));
     }
