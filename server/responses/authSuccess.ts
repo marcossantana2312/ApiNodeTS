@@ -1,15 +1,20 @@
 import { Request, Response } from 'express';
 import * as jwt from 'jwt-simple';
 import * as HTTPStatus from 'http-status';
-const config = require('../config/env/config');
+import * as bcrypt from 'bcrypt';
+
+const config = require('../config/env/config')();
 
 export default function authSuccess(res: Response, credentials: any, data: any){
-    const isMatch = (credentials.password == data.password);
-
+    const isMatch = bcrypt.compareSync(credentials.password, data.password);
+    
     if(isMatch){
         const payload = {id: data.id};
+        let token = jwt.encode(payload, config.secret) 
+        console.log(token);
+        
         res.json({
-            token: jwt.encode(payload, config.secret)
+            token: token
         });
     }else{
         res.sendStatus(HTTPStatus.UNAUTHORIZED)

@@ -1,15 +1,16 @@
 import * as passport from 'passport';
 import { Strategy, ExtractJwt} from 'passport-jwt'
 import UserService from './modules/user/UserService'
-const config = require('./config/env/config');
+const config = require('./config/env/config')();
 
 export default function AuthConfig(){
     const userService = new UserService();
+    
     let opts = {
-        secretKey: config.secret,
-        jwtFromRequest: ExtractJwt.fromAuthHeader()
+        secretOrKey: config.secret,
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
     };
-
+    
     passport.use(new Strategy(opts, (jwtPayload, done)=>{
         userService
             .getById(jwtPayload.id)
@@ -29,7 +30,7 @@ export default function AuthConfig(){
 
     return {
         initialize: ()=>{
-            return passport.initialize()
+            return passport.initialize();
         },
         authenticate: ()=>{
             return passport.authenticate('jwt', {session: false})

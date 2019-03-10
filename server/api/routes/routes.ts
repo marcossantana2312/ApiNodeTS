@@ -1,7 +1,7 @@
 import {Application, Request, Response} from "express";
 import UserRouter from '../../modules/user/UserRouter'
 import TokenRoutes from '../../modules/auth/auth'
-
+import AuthConfig from '../../auth';
 class Routes{
 ;
     private userRouter: UserRouter
@@ -16,11 +16,11 @@ class Routes{
     }
 
     getRoutes(app: Application): void{
-        app.route('/api/users/all').all(this.auth.autenticate()).get(this.userRouter.getAll);
-        app.route('/api/users/:id').all(this.auth.autenticate()).get(this.userRouter.findOne);
-        app.route('/api/users/new').all(this.auth.autenticate()).post(this.userRouter.create);
-        app.route('/api/users/:id/update').all(this.auth.autenticate()).put(this.userRouter.update);
-        app.route('/api/users/:id/delete').all(this.auth.autenticate()).delete(this.userRouter.delete);
+        app.route('/api/users/all').all(this.auth.authenticate()).get(this.userRouter.getAll);
+        app.route('/api/users/:id').all(this.auth.authenticate()).get(this.userRouter.findOne);
+        app.route('/api/users/new').all(this.auth.authenticate()).post(this.userRouter.create);
+        app.route('/api/users/:id/update').all(this.auth.authenticate()).put(this.userRouter.update);
+        app.route('/api/users/:id/delete').all(this.auth.authenticate()).delete(this.userRouter.delete);
         app.post('/token', this.tokenRoute.auth)
     }
 }

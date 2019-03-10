@@ -37,7 +37,9 @@ class UserService{
        return model.User.update(
            user, {
                 where: {id},
-                fields: ['name', 'email', 'password']
+                fields: ['name', 'email', 'password'],
+                hooks: true,
+                individualHooks: true
             }
         );
     }

@@ -14,7 +14,7 @@ class TokenRoutes{
             email: req.body.email,
             password: req.body.password
         };
-
+        
         if(credentials.hasOwnProperty('email') && credentials.hasOwnProperty('password')){
             userService
                 .getByEmail(credentials.email)
